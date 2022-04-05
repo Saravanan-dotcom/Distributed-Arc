@@ -1,0 +1,45 @@
+server:
+  port: 9191
+
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      routes:
+        - id: SPORTS-ACADEMY
+          uri: lb://SPORTS-ACADEMY
+          predicates:
+            - Path=/sports/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: SPORTS-ACADEMY
+                fallbackuri: forward:/sportsAcademyServiceFallBack
+        - id: SPORT-SUBSCRIBE
+          uri: lb://SPORT-SUBSCRIBE
+          predicates:
+            - Path=/student/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: SPORT-SUBSCRIBE
+                fallbackuri: forward:/sportSubscribeServiceFallBack
+
+
+
+hystrix:
+  command:
+    fallbackcmd:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 4000
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
+
